@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto/Manual ATS Wiring Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #121212;
+            color: #ffffff;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+        }
+
+        .left-panel {
+            flex: 1;
+            padding: 40px;
+            background: #1e1e1e;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .right-panel {
+            flex: 1;
+            position: relative;
+            background: #252525;
+            border-left: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        h1 {
+            color: #4ade80;
+        }
+
+        .step-container {
+            background: #2d2d2d;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .step-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .step-desc {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #bbb;
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button.primary {
+            background: #3b82f6;
+            color: #fff;
+        }
+
+        button.primary:hover {
+            background: #2563eb;
+        }
+
+        button.secondary {
+            background: #4b5563;
+            color: #fff;
+        }
+
+        button.secondary:hover {
+            background: #374151;
+        }
+
+        button:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .diagram {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            border: 2px solid #333;
+        }
+
+        .comp {
+            position: absolute;
+            background: #333;
+            border: 2px solid #555;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 5px;
+        }
+
+        .comp-title {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ccc;
+            text-align: center;
+        }
+
+        .term {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #aaa;
+            border-radius: 50%;
+            border: 2px solid #222;
+            transform: translate(-50%, -50%);
+        }
+
+        .term-label {
+            position: absolute;
+            font-size: 10px;
+            color: #aaa;
+            font-family: monospace;
+            transform: translateY(-50%);
+        }
+
+        /* Terminals definition dynamically placed via inline styles for mapping to SVG coordinates */
+        .wire-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .wire-path {
+            fill: none;
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0;
+            transition: opacity 0.3s;
+            stroke-dasharray: 2000;
+            stroke-dashoffset: 2000;
+        }
+
+        .wire-path.active {
+            opacity: 1;
+            animation: drawWire 2s forwards ease-in-out;
+            filter: drop-shadow(0 0 5px currentColor);
+        }
+
+        .wire-path.persistent {
+            opacity: 0.8;
+            stroke-dasharray: 0;
+            stroke-dashoffset: 0;
+            filter: none;
+        }
+
+        @keyframes drawWire {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .highlight-term {
+            box-shadow: 0 0 10px 4px yellow;
+            background: yellow;
+            border-color: #fff;
+        }
+
+        .node-source {
+            position: absolute;
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            z-index: 5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="left-panel">
+        <div class="step-container">
+            <div class="step-title" id="stepTitle">Introduction</div>
+            <div class="step-desc" id="stepDesc">
+                Welcome to the Advanced Auto/Manual ATS wiring.<br><br>
+                We have added:<br>
+                1. <strong>A Selector Switch (3 position)</strong>: Connects power to Auto or Manual logic.<br>
+                2. <strong>Two Push Buttons</strong>: For starting the Grid or Generator manually.<br>
+                3. <strong>Holding Contacts (13/14)</strong>: To keep the contactors closed after you let go of the push
+                button.<br><br>
+                Click 'Start Wiring' to trace the logic layer by layer.
+            </div>
+            <div class="controls">
+                <button class="secondary" id="prevBtn" onclick="prevStep()" disabled>Previous</button>
+                <button class="primary" id="nextBtn" onclick="nextStep()">Start Wiring</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="diagram" id="diagram">
+            <div class="node-source" style="top:32px; left:-20px; background:#ef4444;">Grid L</div>
+            <div class="node-source" style="top:32px; right:-20px; background:#eab308;">Gen L</div>
+
+            <!-- R1: x=20, y=20. W=100. H=120 -->
+            <div class="comp" style="top:20px; left:20px; width:100px; height:120px;">
+                <div class="comp-title" style="color:#4ade80;">Relay (R1)</div>
+                <div class="term" id="r1-a1" style="left:20px; top:20px;"></div>
+                <div class="term-label" style="left:10px; top:35px;">A1</div>
+                <div class="term" id="r1-a2" style="left:80px; top:20px;"></div>
+                <div class="term-label" style="left:70px; top:35px;">A2</div>
+                <div class="term" id="r1-com" style="left:50px; top:100px;"></div>
+                <div class="term-label" style="left:40px; top:85px;">COM</div>
+                <div class="term" id="r1-no" style="left:20px; top:100px;"></div>
+                <div class="term-label" style="left:10px; top:85px;">NO</div>
+                <div class="term" id="r1-nc" style="left:80px; top:100px;"></div>
+                <div class="term-label" style="left:70px; top:85px;">NC</div>
+            </div>
+
+            <!-- T1: x=480, y=20. W=100. H=120 -->
+            <div class="comp" style="top:20px; left:480px; width:100px; height:120px;">
+                <div class="comp-title" style="color:#fbbf24;">Timer (T1)</div>
+                <div class="term" id="t1-a1" style="left:20px; top:20px;"></div>
+                <div class="term-label" style="left:10px; top:35px;">A1</div>
+                <div class="term" id="t1-a2" style="left:80px; top:20px;"></div>
+                <div class="term-label" style="left:70px; top:35px;">A2</div>
+                <div class="term" id="t1-com" style="left:50px; top:100px;"></div>
+                <div class="term-label" style="left:40px; top:85px;">COM</div>
+                <div class="term" id="t1-no" style="left:80px; top:100px;"></div>
+                <div class="term-label" style="left:70px; top:85px;">NO</div>
+            </div>
+
+            <!-- Selector Switch: x=230, y=20. W=140. H=120 -->
+            <div class="comp" style="top:20px; left:230px; width:140px; height:120px;">
+                <div class="comp-title" style="color:#fff;">Selector Switch</div>
+                <div class="term-label" style="left:50px; top:20px; color:#ef4444">Grid Side</div>
+                <div class="term-label" style="left:100px; top:20px; color:#eab308">Gen Side</div>
+                <div class="term" id="ss-g-com" style="left:20px; top:30px;"></div>
+                <div class="term-label" style="left:30px; top:30px;">COM</div>
+                <div class="term" id="ss-g-auto" style="left:20px; top:60px;"></div>
+                <div class="term-label" style="left:30px; top:60px;">AUTO</div>
+                <div class="term" id="ss-g-man" style="left:20px; top:90px;"></div>
+                <div class="term-label" style="left:30px; top:90px;">MAN</div>
+
+                <div class="term" id="ss-gen-com" style="left:120px; top:30px;"></div>
+                <div class="term-label" style="left:85px; top:30px;">COM</div>
+                <div class="term" id="ss-gen-auto" style="left:120px; top:60px;"></div>
+                <div class="term-label" style="left:85px; top:60px;">AUTO</div>
+                <div class="term" id="ss-gen-man" style="left:120px; top:90px;"></div>
+                <div class="term-label" style="left:85px; top:90px;">MAN</div>
+            </div>
+
+            <!-- Grid PB: x=60, y=180. W=80. -->
+            <div class="comp" style="top:180px; left:60px; width:80px; height:60px;">
+                <div class="comp-title" style="color:#4ade80;">Grid Start</div>
+                <div class="term" id="gpb-in" style="left:15px; top:30px;"></div>
+                <div class="term-label" style="left:5px; top:15px;">IN</div>
+                <div class="term" id="gpb-out" style="left:65px; top:30px;"></div>
+                <div class="term-label" style="left:55px; top:15px;">OUT</div>
+            </div>
+
+            <!-- Gen PB: x=460, y=180. W=80. -->
+            <div class="comp" style="top:180px; left:460px; width:80px; height:60px;">
+                <div class="comp-title" style="color:#eab308;">Gen Start</div>
+                <div class="term" id="genpb-in" style="left:15px; top:30px;"></div>
+                <div class="term-label" style="left:5px; top:15px;">IN</div>
+                <div class="term" id="genpb-out" style="left:65px; top:30px;"></div>
+                <div class="term-label" style="left:55px; top:15px;">OUT</div>
+            </div>
+
+            <!-- K1: x=40, y=320. W=140. H=180. -->
+            <div class="comp" style="top:320px; left:40px; width:140px; height:180px;">
+                <div class="comp-title" style="color:#4ade80;">Grid Contactor (K1)</div>
+                <div class="term" id="k1-a1" style="left:120px; top:30px;"></div>
+                <div class="term-label" style="left:90px; top:30px;">A1</div>
+                <div class="term" id="k1-13" style="left:20px; top:80px;"></div>
+                <div class="term-label" style="left:30px; top:80px;">13(NO)</div>
+                <div class="term" id="k1-14" style="left:20px; top:110px;"></div>
+                <div class="term-label" style="left:30px; top:110px;">14(NO)</div>
+                <div class="term" id="k1-21" style="left:120px; top:80px;"></div>
+                <div class="term-label" style="left:80px; top:80px;">21(NC)</div>
+                <div class="term" id="k1-22" style="left:120px; top:110px;"></div>
+                <div class="term-label" style="left:80px; top:110px;">22(NC)</div>
+                <div class="term" id="k1-a2" style="left:120px; top:160px;"></div>
+                <div class="term-label" style="left:90px; top:160px;">A2</div>
+            </div>
+
+            <!-- K2: x=420, y=320. W=140. H=180. -->
+            <div class="comp" style="top:320px; left:420px; width:140px; height:180px;">
+                <div class="comp-title" style="color:#fbbf24;">Gen Contactor (K2)</div>
+                <div class="term" id="k2-a1" style="left:120px; top:30px;"></div>
+                <div class="term-label" style="left:90px; top:30px;">A1</div>
+                <div class="term" id="k2-13" style="left:20px; top:80px;"></div>
+                <div class="term-label" style="left:30px; top:80px;">13(NO)</div>
+                <div class="term" id="k2-14" style="left:20px; top:110px;"></div>
+                <div class="term-label" style="left:30px; top:110px;">14(NO)</div>
+                <div class="term" id="k2-21" style="left:120px; top:80px;"></div>
+                <div class="term-label" style="left:80px; top:80px;">21(NC)</div>
+                <div class="term" id="k2-22" style="left:120px; top:110px;"></div>
+                <div class="term-label" style="left:80px; top:110px;">22(NC)</div>
+                <div class="term" id="k2-a2" style="left:120px; top:160px;"></div>
+                <div class="term-label" style="left:90px; top:160px;">A2</div>
+            </div>
+
+            <svg class="wire-svg" id="wires">
+                <!-- Power to Selector Switch -->
+                <path id="w_sense" class="wire-path" stroke="#ef4444" d="M 0 40 L 40 40" />
+                <path id="w_ss_g" class="wire-path" stroke="#ef4444" d="M 0 50 L 250 50" />
+                <path id="w_ss_gen" class="wire-path" stroke="#eab308" d="M 600 50 L 350 50" />
+
+                <!-- Grid Auto Path -->
+                <path id="w_g_auto1" class="wire-path" stroke="#10b981" d="M 250 80 L 70 80 L 70 120" />
+                <path id="w_g_auto2" class="wire-path" stroke="#10b981" d="M 40 120 L 40 280 L 540 280 L 540 400" />
+                <path id="w_g_auto3" class="wire-path" stroke="#10b981"
+                    d="M 540 430 L 540 470 L 220 470 L 220 350 L 160 350" />
+
+                <!-- Grid Manual Path -->
+                <path id="w_g_man1" class="wire-path" stroke="#3b82f6" d="M 250 110 L 75 110 L 75 210" />
+                <path id="w_g_man2" class="wire-path" stroke="#3b82f6" d="M 125 210 L 125 290 L 550 290 L 550 400" />
+                <path id="w_g_hold1" class="wire-path" stroke="#ec4899" d="M 75 210 L 60 210 L 60 400" />
+                <path id="w_g_hold2" class="wire-path" stroke="#ec4899"
+                    d="M 125 210 L 125 250 L 30 250 L 30 430 L 60 430" />
+
+                <!-- Gen Auto Path -->
+                <path id="w_gen_auto1" class="wire-path" stroke="#f97316" d="M 350 80 L 100 80 L 100 120" />
+                <path id="w_gen_auto2" class="wire-path" stroke="#f97316"
+                    d="M 100 120 L 100 150 L 580 150 L 580 40 L 500 40" />
+                <path id="w_gen_auto2_jump" class="wire-path" stroke="#f97316" d="M 580 120 L 530 120" />
+                <path id="w_gen_auto3" class="wire-path" stroke="#f97316" d="M 560 120 L 560 300 L 160 300 L 160 400" />
+                <path id="w_gen_auto4" class="wire-path" stroke="#f97316"
+                    d="M 160 430 L 160 480 L 380 480 L 380 350 L 540 350" />
+
+                <!-- Gen Manual Path -->
+                <path id="w_gen_man1" class="wire-path" stroke="#a855f7" d="M 350 110 L 475 110 L 475 210" />
+                <path id="w_gen_man2" class="wire-path" stroke="#a855f7" d="M 525 210 L 525 310 L 150 310 L 150 400" />
+                <path id="w_gen_hold1" class="wire-path" stroke="#f43f5e" d="M 475 210 L 440 210 L 440 400" />
+                <path id="w_gen_hold2" class="wire-path" stroke="#f43f5e"
+                    d="M 525 210 L 525 260 L 570 260 L 570 430 L 440 430" />
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        const steps = [
+            {
+                title: "Introduction",
+                desc: "Welcome to the Advanced Auto/Manual ATS wiring.<br><br>We have added:<br>1. <strong>A Selector Switch</strong>: Routes power to Auto or Manual logic.<br>2. <strong>Two Push Buttons (Start)</strong>: For starting the Grid or Generator manually.<br>3. <strong>Holding Contacts (13/14)</strong>: To keep the contactors closed after you let go of the push button.<br><br>Click 'Start Wiring' to trace the logic layer by layer.",
+                wires: [], dots: []
+            },
+            {
+                title: "1. The Power Source Layer",
+                desc: "<strong>Red & Yellow Wires</strong><br><br>- <strong>Grid Phase (Red)</strong> goes straight to the Grid Relay (R1) Coil so the ATS always knows if the Grid is alive.<br>- <strong>Grid Phase</strong> also attaches to the Grid COM input on the Selector Switch.<br>- <strong>Gen Phase (Yellow)</strong> attaches to the Gen COM input on the Selector Switch.<br><br>The Selector Switch acts as the 'Gatekeeper' for the rest of the circuit.",
+                wires: ['w_sense', 'w_ss_g', 'w_ss_gen'],
+                dots: ['r1-a1', 'ss-g-com', 'ss-gen-com']
+            },
+            {
+                title: "2. The Auto Mode (Grid Side)",
+                desc: "<strong>Green Wires</strong><br><br>When the Selector is turned to AUTO, electricity sneaks out the Grid 'AUTO' pin.<br>1. It flows into the Grid Relay (R1 COM).<br>2. Because the grid is alive, R1 is physically ON, allowing power out of the Normally Open (NO) pin.<br>3. It crosses safely through the Gen Contactor's Interlock (21 to 22).<br>4. It finally lands at K1 A1, turning the Grid on!",
+                wires: ['w_g_auto1', 'w_g_auto2', 'w_g_auto3'],
+                dots: ['ss-g-auto', 'r1-com', 'r1-no', 'k2-21', 'k2-22', 'k1-a1']
+            },
+            {
+                title: "3. The Manual Mode (Grid Push Button)",
+                desc: "<strong>Blue Wires</strong><br><br>When turned to MANUAL, the Auto pin dies, and the Grid 'MAN' pin goes live.<br>1. Power flows out the MAN pin straight into the Grid Push Button.<br>2. When you push the button, power continues through the interlock (K2 NC) and turns on K1.<br><br><em>But what happens when you let go of the button? It would shut off! See the next step...</em>",
+                wires: ['w_g_man1', 'w_g_man2'],
+                dots: ['ss-g-man', 'gpb-in', 'gpb-out', 'k2-21']
+            },
+            {
+                title: "4. The Grid Holding Circuit (Latching)",
+                desc: "<strong>Pink Wires</strong><br><br>To keep K1 ON after you let go of the button, we wire the Grid Push Button in parallel with K1's <strong>Normally Open (13/14)</strong> block.<br><br>When you tap the button, K1 slams shut. This ALSO closes the 13/14 block, creating an electrical bridge that bypasses the button. K1 will now feed itself indefinitely!<br><em>(To turn it off, simply turn the Selector switch back to OFF or AUTO to break the holding loop).</em>",
+                wires: ['w_g_hold1', 'w_g_hold2'],
+                dots: ['gpb-in', 'k1-13', 'gpb-out', 'k1-14', 'k2-21']
+            },
+            {
+                title: "5. The Auto Mode (Gen Side)",
+                desc: "<strong>Orange Wires</strong><br><br>When the Selector is in AUTO and the Grid Dies, power flows from the Gen Phase 'AUTO' pin.<br>1. It hits the Grid Relay NC pin (which is closed because the Relay just died).<br>2. It activates the 5-second Timer (T1).<br>3. After 5s, the timer outputs power through the K1 Interlock (21 to 22), finally activating the Generator (K2).",
+                wires: ['w_gen_auto1', 'w_gen_auto2', 'w_gen_auto2_jump', 'w_gen_auto3', 'w_gen_auto4'],
+                dots: ['ss-gen-auto', 'r1-nc', 't1-a1', 't1-com', 't1-no', 'k1-21', 'k1-22', 'k2-a1']
+            },
+            {
+                title: "6. The Manual Mode (Gen Push Button & Hold)",
+                desc: "<strong>Purple Wires (Path + Hold)</strong><br><br>When turned to MANUAL, power leaves the Gen 'MAN' pin to your Gen Push Button.<br>Just like the Grid side, it runs through the safety interlock (K1 NC) to turn K2 on safely. <br><br>We wire the button in parallel with K2's 13/14 Holding block so that when you release the generator push button, K2 stays locked ON!",
+                wires: ['w_gen_man1', 'w_gen_man2', 'w_gen_hold1', 'w_gen_hold2'],
+                dots: ['ss-gen-man', 'genpb-in', 'genpb-out', 'k1-21', 'k2-13', 'k2-14']
+            },
+            {
+                title: "Complete",
+                desc: "You have now fully wired a professional Auto/Manual interlocked ATS!<br><br><strong>Note on Neutrals:</strong> Since this diagram is packed, remember to loop a Blue neutral wire to all coils: K1 A2, K2 A2, R1 A2, and T1 A2.",
+                wires: [], dots: []
+            }
+        ];
+
+        let currentStep = 0;
+
+        function updateUI() {
+            document.getElementById('stepTitle').innerHTML = steps[currentStep].title;
+            document.getElementById('stepDesc').innerHTML = steps[currentStep].desc;
+
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').innerText = currentStep === steps.length - 1 ? "Finish" : (currentStep === 0 ? "Start Wiring" : "Next Circuit");
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+
+            const paths = document.querySelectorAll('.wire-path');
+            paths.forEach(p => {
+                p.style.animation = 'none';
+                p.offsetHeight;
+                p.classList.remove('active', 'persistent');
+            });
+
+            document.querySelectorAll('.term').forEach(el => el.classList.remove('highlight-term'));
+
+            for (let i = 0; i < currentStep; i++) {
+                steps[i].wires.forEach(w => {
+                    const el = document.getElementById(w);
+                    if (el) el.classList.add('persistent');
+                });
+            }
+
+            if (currentStep > 0) {
+                steps[currentStep].wires.forEach(w => {
+                    const el = document.getElementById(w);
+                    if (el) { el.style.animation = ''; el.classList.add('active'); }
+                });
+                steps[currentStep].dots.forEach(d => {
+                    const el = document.getElementById(d);
+                    if (el) el.classList.add('highlight-term');
+                });
+            }
+        }
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep++; updateUI(); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; updateUI(); } }
+        updateUI();
+    </script>
+</body>
+
+</html>
