@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATS Interactive Wiring Diagram</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e1e1e; color: #fff; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { background: #2d2d; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 800px; max-width: 100%; text-align: center; }
+        .diagram { position: relative; width: 100%; height: 400px; background: #121212; border-radius: 8px; margin: 20px 0; border: 2px solid #3d3d3d; overflow: hidden; }
+        .node { position: absolute; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 14px; z-index: 10; }
+        .grid-node { top: 50px; left: 50px; background: #2e7d32; border: 2px solid #4caf50; }
+        .gen-node { top: 50px; right: 50px; background: #c62828; border: 2px solid #ef5350; }
+        .contactor { position: absolute; width: 150px; height: 90px; background: #424242; border: 2px solid #757575; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; transition: all 0.3s; }
+        .k1 { top: 150px; left: 35px; }
+        .k2 { top: 150px; right: 35px; }
+        .interlock { position: absolute; top: 180px; left: 50%; transform: translateX(-50%); background: #ff9800; padding: 5px 15px; border-radius: 4px; font-size: 12px; font-weight: bold; color: #000; z-index: 5; }
+        .interlock-line { position: absolute; top: 190px; left: 185px; width: calc(100% - 370px); height: 4px; background: transparent; border-style: dashed; border-width: 2px; border-color: #ff9800; border-top: none; border-bottom: none; z-index: 4; }
+        .home-node { bottom: 50px; left: 50%; transform: translateX(-50%); background: #1565c0; border: 2px solid #42a5f5; width: 120px; text-align: center; }
+        
+        /* Wires */
+        .wire { position: absolute; background: #555; z-index: 1; transition: background 0.3s, box-shadow 0.3s; }
+        .wire-v { width: 6px; }
+        .wire-h { height: 6px; }
+        
+        /* Grid to K1 */
+        .w-g-k1 { top: 90px; left: 107px; height: 60px; }
+        /* Gen to K2 */
+        .w-gen-k2 { top: 90px; right: 107px; height: 60px; }
+        /* K1 to Home */
+        .w-k1-h1 { top: 240px; left: 107px; height: 60px; }
+        .w-k1-h2 { top: 300px; left: 110px; width: calc(50% - 110px); }
+        .w-k1-h3 { top: 300px; left: 50%; height: 20px; transform: translateX(-50%); }
+        /* K2 to Home */
+        .w-k2-h1 { top: 240px; right: 107px; height: 60px; }
+        .w-k2-h2 { top: 300px; right: 110px; width: calc(50% - 110px); }
+        
+        /* Active States */
+        body.grid-active .grid-node { box-shadow: 0 0 15px #4caf50; }
+        body.grid-active .w-g-k1 { background: #4caf50; box-shadow: 0 0 10px #4caf50; }
+        body.grid-active .k1 { border-color: #4caf50; background: #388e3c; }
+        body.grid-active .w-k1-h1, body.grid-active .w-k1-h2, body.grid-active .w-k1-h3 { background: #4caf50; box-shadow: 0 0 10px #4caf50; }
+        body.grid-active .home-node { box-shadow: 0 0 15px #4caf50; }
+        body.grid-active .status-text { color: #4caf50; }
+
+        body.gen-active .gen-node { box-shadow: 0 0 15px #ef5350; }
+        body.gen-active .w-gen-k2 { background: #ef5350; box-shadow: 0 0 10px #ef5350; }
+        body.gen-active .k2 { border-color: #ef5350; background: #d32f2f; }
+        body.gen-active .w-k2-h1, body.gen-active .w-k2-h2, body.gen-active .w-k1-h3 { background: #ef5350; box-shadow: 0 0 10px #ef5350; }
+        body.gen-active .home-node { box-shadow: 0 0 15px #ef5350; }
+        body.gen-active .status-text { color: #ef5350; }
+
+        body.timer-active .status-text { color: #ffeb3b; }
+
+        .controls { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+        button { padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 14px; }
+        button:hover { opacity: 0.8; transform: translateY(-2px); }
+        .btn-grid { background: #4caf50; color: white; }
+        .btn-fail { background: #9e9e9e; color: white; }
+        
+        .status { margin-top: 20px; font-size: 18px; font-weight: bold; }
+        .timer { font-size: 24px; color: #ffeb3b; display: none; margin-left:10px; }
+        body.timer-active .timer { display: inline-block; }
+
+        .nc-contact { font-size: 11px; margin-top: 8px; color: #ccc; }
+        .active-contactor .nc-contact { color: #ffc107; font-weight: bold;}
+        
+        .explanation { text-align: left; margin-top: 30px; padding: 20px; background: #1e1e1e; border-radius: 8px; font-size: 15px; line-height: 1.6; border-left: 4px solid #4caf50; transition: border-color 0.3s; }
+        body.gen-active .explanation { border-left-color: #ef5350; }
+        body.timer-active .explanation { border-left-color: #ffeb3b; }
+
+    </style>
+</head>
+<body class="grid-active">
+
+<div class="container" style="background: #2d2d2d;">
+    <h2>Interactive ATS Logic Simulator</h2>
+    <p>Click the buttons below to see how the electrical interlock, timers, and active paths work in real-time.</p>
+    
+    <div class="status">System Status: <span class="status-text" id="statusText">Grid Power Active</span> <span class="timer" id="timerText"></span></div>
+
+    <div class="diagram">
+        <div class="node grid-node">GRID (City Power)</div>
+        <div class="node gen-node">GENERATOR</div>
+        
+        <!-- Wires -->
+        <div class="wire wire-v w-g-k1"></div>
+        <div class="wire wire-v w-gen-k2"></div>
+        <div class="wire wire-v w-k1-h1"></div>
+        <div class="wire wire-h w-k1-h2"></div>
+        <div class="wire wire-v w-k1-h3"></div>
+        <div class="wire wire-v w-k2-h1"></div>
+        <div class="wire wire-h w-k2-h2"></div>
+
+        <div class="interlock-line"></div>
+        <div class="interlock">MECHANICAL & ELECTRICAL INTERLOCK</div>
+
+        <div class="contactor k1 active-contactor" id="k1">
+            <strong>K1 (Grid)</strong>
+            <span style="font-size: 12px;">Contactor Coil: ENERGIZED</span>
+            <div class="nc-contact">NC Contact to K2:<br>PHYSICALLY OPEN</div>
+        </div>
+
+        <div class="contactor k2" id="k2">
+            <strong>K2 (Gen)</strong>
+            <span style="font-size: 12px;">Contactor Coil: OFF</span>
+            <div class="nc-contact">NC Contact to K1:<br>CLOSED (Resting)</div>
+        </div>
+
+        <div class="node home-node">HOME LOAD</div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-grid" onclick="setGrid()">Restore Grid Power</button>
+        <button class="btn-fail" onclick="failGrid()">Simulate Grid Failure</button>
+    </div>
+
+    <div class="explanation" id="explanationText">
+        <strong>Current State: Auto Mode - Grid Priority</strong><br><br>
+        1. Grid power is present. The Grid Relay is pulling K1 (Grid Contactor) closed.<br>
+        2. Electricity flows from the GRID directly to the HOME LOAD.<br>
+        3. <strong>Safety Interlock:</strong> Because K1 is closed, its NC (Normally Closed) auxiliary contact is physically forced open. This makes it impossible for the Generator Contactor (K2) to receive a start signal, preventing a catastrophic collision of both power sources.
+    </div>
+</div>
+
+<script>
+    let timerInterval;
+
+    function setGrid() {
+        clearInterval(timerInterval);
+        document.body.className = 'grid-active';
+        document.getElementById('statusText').innerText = "Grid Power Active";
+        
+        document.getElementById('k1').classList.add('active-contactor');
+        document.getElementById('k1').querySelector('span').innerText = "Contactor Coil: ENERGIZED";
+        document.getElementById('k1').querySelector('.nc-contact').innerHTML = "NC Contact to K2:<br>PHYSICALLY OPEN";
+        
+        document.getElementById('k2').classList.remove('active-contactor');
+        document.getElementById('k2').querySelector('span').innerText = "Contactor Coil: OFF";
+        document.getElementById('k2').querySelector('.nc-contact').innerHTML = "NC Contact to K1:<br>CLOSED (Resting)";
+        
+        document.getElementById('explanationText').innerHTML = `
+            <strong>Current State: Grid Restored</strong><br><br>
+            1. Grid power is detected by the main relay.<br>
+            2. The ATS instantly drops the Generator contactor (K2).<br>
+            3. After a brief safety pause, K1 closes, returning the house to city power.<br>
+            4. <strong>Safety Interlock:</strong> K1's NC contact opens, securely locking out K2.
+        `;
+    }
+
+    function failGrid() {
+        if(document.body.className === 'timer-active' || document.body.className === 'gen-active') return;
+        
+        clearInterval(timerInterval);
+        document.body.className = 'timer-active';
+        document.getElementById('statusText').innerText = "Grid Failed - Generator Starting...";
+        
+        document.getElementById('k1').classList.remove('active-contactor');
+        document.getElementById('k1').querySelector('span').innerText = "Contactor Coil: OFF";
+        document.getElementById('k1').querySelector('.nc-contact').innerHTML = "NC Contact to K2:<br>CLOSED (Resting)";
+        
+        document.getElementById('k2').classList.remove('active-contactor');
+        document.getElementById('k2').querySelector('span').innerText = "Contactor Coil: OFF";
+        document.getElementById('k2').querySelector('.nc-contact').innerHTML = "NC Contact to K1:<br>CLOSED (Resting)";
+
+        document.getElementById('explanationText').innerHTML = `
+            <strong>Current State: Grid Failure Detected</strong><br><br>
+            1. Grid Relay loses power and instantly releases K1 (Grid Contactor).<br>
+            2. The house loses power temporarily (Blackout).<br>
+            3. Because K1 dropped, K1's NC contact springs back to CLOSED. The pathway for K2 is now electrically unlocked.<br>
+            4. The Generator startup sequence begins. Waiting for generator voltage to stabilize...
+        `;
+
+        let timeLeft = 5;
+        document.getElementById('timerText').innerText = `(${timeLeft}s)`;
+        
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timerText').innerText = `(${timeLeft}s)`;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                activateGen();
+            }
+        }, 1000);
+    }
+
+    function activateGen() {
+        document.body.className = 'gen-active';
+        document.getElementById('statusText').innerText = "Generator Power Active";
+        document.getElementById('timerText').innerText = "";
+
+        document.getElementById('k2').classList.add('active-contactor');
+        document.getElementById('k2').querySelector('span').innerText = "Contactor Coil: ENERGIZED";
+        document.getElementById('k2').querySelector('.nc-contact').innerHTML = "NC Contact to K1:<br>PHYSICALLY OPEN";
+        
+        document.getElementById('k1').classList.remove('active-contactor');
+        document.getElementById('k1').querySelector('span').innerText = "Contactor Coil: OFF";
+        document.getElementById('k1').querySelector('.nc-contact').innerHTML = "NC Contact to K2:<br>CLOSED (Resting)";
+
+        document.getElementById('explanationText').innerHTML = `
+            <strong>Current State: Generator Running</strong><br><br>
+            1. The 5-second timer finished. Generator power is stable.<br>
+            2. Current flows through K1's NC contact (which is resting closed) and hits K2's coil.<br>
+            3. K2 closes, sending generator power to the house load.<br>
+            4. <strong>Safety Interlock:</strong> Because K2 is now closed, <em>its</em> NC contact is physically pulled open. This completely locks out K1. Even if grid power suddenly sparks back to life, K1 cannot physically close until the ATS sequence shuts off K2 first.
+        `;
+    }
+</script>
+
+</body>
+</html>

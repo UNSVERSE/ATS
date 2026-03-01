@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATS Color-Coded Wiring Diagram</title>
+    <style>
+        body {
+            background: #1a1a2e;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1050px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #4ade80;
+            margin-bottom: 5px;
+        }
+
+        p {
+            color: #a0aec0;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        svg {
+            background: #16213e;
+            border: 2px solid #0f3460;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .wire {
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: stroke-width 0.2s, filter 0.2s;
+        }
+
+        .wire:hover {
+            stroke-width: 6px;
+            filter: drop-shadow(0 0 8px currentColor);
+            cursor: pointer;
+        }
+
+        .label {
+            font-size: 15px;
+            fill: #fff;
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        .term {
+            font-size: 11px;
+            fill: #0ff;
+            font-family: monospace;
+            pointer-events: none;
+        }
+
+        .component {
+            fill: #222831;
+            stroke: #394867;
+            stroke-width: 3;
+        }
+
+        .dot {
+            fill: #fff;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #252a34;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .swatch {
+            width: 20px;
+            height: 4px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Automatic Transfer Switch (ATS)</h1>
+        <p>Complete Color-Coded Control & Power Schematic</p>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="swatch" style="background:#EF4444; height:8px;"></div> Grid Phase Main
+            </div>
+            <div class="legend-item">
+                <div class="swatch" style="background:#EAB308; height:8px;"></div> Gen Phase Main
+            </div>
+            <div class="legend-item">
+                <div class="swatch" style="background:#3B82F6; height:8px;"></div> Neutral lines
+            </div>
+            <div class="legend-item">
+                <div class="swatch" style="background:#10B981;"></div> Grid Control (Starts K1)
+            </div>
+            <div class="legend-item">
+                <div class="swatch" style="background:#F97316;"></div> Gen Control (Starts K2)
+            </div>
+            <div class="legend-item">
+                <div class="swatch" style="background:#ffffff; height:8px;"></div> Output to Home
+            </div>
+        </div>
+
+        <svg width="1000" height="850" viewBox="0 0 1000 850">
+            <!-- Grid Breaker -->
+            <rect x="50" y="50" width="100" height="120" class="component" rx="5" />
+            <text x="100" y="80" class="label" text-anchor="middle">Grid MCB</text>
+            <circle cx="80" cy="140" r="5" class="dot" /> <text x="65" y="145" class="term">L</text>
+            <circle cx="120" cy="140" r="5" class="dot" /> <text x="135" y="145" class="term">N</text>
+
+            <!-- Gen Breaker -->
+            <rect x="850" y="50" width="100" height="120" class="component" rx="5" />
+            <text x="900" y="80" class="label" text-anchor="middle">Gen MCB</text>
+            <circle cx="880" cy="140" r="5" class="dot" /> <text x="865" y="145" class="term">L</text>
+            <circle cx="920" cy="140" r="5" class="dot" /> <text x="935" y="145" class="term">N</text>
+
+            <!-- Relay R1 -->
+            <rect x="425" y="50" width="150" height="150" class="component" rx="5" />
+            <text x="500" y="75" class="label" fill="#4ade80" text-anchor="middle">Grid Relay (R1)</text>
+            <circle cx="450" cy="110" r="5" class="dot" /> <text x="450" y="100" class="term"
+                text-anchor="middle">A1(L)</text>
+            <circle cx="550" cy="110" r="5" class="dot" /> <text x="550" y="100" class="term"
+                text-anchor="middle">A2(N)</text>
+            <circle cx="450" cy="170" r="5" class="dot" /> <text x="450" y="190" class="term"
+                text-anchor="middle">COM</text>
+            <circle cx="500" cy="170" r="5" class="dot" /> <text x="500" y="190" class="term"
+                text-anchor="middle">NO</text>
+            <circle cx="550" cy="170" r="5" class="dot" /> <text x="550" y="190" class="term"
+                text-anchor="middle">NC</text>
+
+            <!-- Timer T1 -->
+            <rect x="730" y="250" width="140" height="120" class="component" rx="5" />
+            <text x="800" y="275" class="label" fill="#fbbf24" text-anchor="middle">Gen Timer (T1)</text>
+            <circle cx="760" cy="310" r="5" class="dot" /> <text x="760" y="300" class="term"
+                text-anchor="middle">A1(L)</text>
+            <circle cx="840" cy="310" r="5" class="dot" /> <text x="840" y="300" class="term"
+                text-anchor="middle">A2(N)</text>
+            <circle cx="760" cy="350" r="5" class="dot" /> <text x="760" y="370" class="term"
+                text-anchor="middle">COM</text>
+            <circle cx="840" cy="350" r="5" class="dot" /> <text x="840" y="370" class="term"
+                text-anchor="middle">NO(Delay)</text>
+
+            <!-- Contactor K1 -->
+            <rect x="150" y="480" width="200" height="260" class="component" rx="10" />
+            <text x="250" y="515" class="label" fill="#4ade80" text-anchor="middle">Grid Contactor (K1)</text>
+            <circle cx="180" cy="550" r="5" class="dot" /> <text x="180" y="540" class="term" fill="#EF4444"
+                text-anchor="middle">L1</text>
+            <circle cx="250" cy="550" r="5" class="dot" /> <text x="250" y="540" class="term" fill="#3B82F6"
+                text-anchor="middle">L2(N)</text>
+            <circle cx="320" cy="550" r="5" class="dot" /> <text x="320" y="540" class="term" fill="#10B981"
+                text-anchor="middle">A1(Coil)</text>
+
+            <circle cx="180" cy="610" r="5" class="dot" /> <text x="180" y="600" class="term"
+                text-anchor="middle">21(NC)</text>
+            <circle cx="180" cy="670" r="5" class="dot" /> <text x="180" y="660" class="term"
+                text-anchor="middle">22(NC)</text>
+
+            <circle cx="320" cy="710" r="5" class="dot" /> <text x="320" y="730" class="term" fill="#3B82F6"
+                text-anchor="middle">A2(N)</text>
+            <circle cx="180" cy="710" r="5" class="dot" /> <text x="180" y="730" class="term"
+                text-anchor="middle">T1</text>
+            <circle cx="250" cy="710" r="5" class="dot" /> <text x="250" y="730" class="term"
+                text-anchor="middle">T2(N)</text>
+
+            <!-- Contactor K2 -->
+            <rect x="650" y="480" width="200" height="260" class="component" rx="10" />
+            <text x="750" y="515" class="label" fill="#fbbf24" text-anchor="middle">Gen Contactor (K2)</text>
+            <circle cx="680" cy="550" r="5" class="dot" /> <text x="680" y="540" class="term" fill="#EAB308"
+                text-anchor="middle">L1</text>
+            <circle cx="750" cy="550" r="5" class="dot" /> <text x="750" y="540" class="term" fill="#3B82F6"
+                text-anchor="middle">L2(N)</text>
+            <circle cx="820" cy="550" r="5" class="dot" /> <text x="820" y="540" class="term" fill="#F97316"
+                text-anchor="middle">A1(Coil)</text>
+
+            <circle cx="680" cy="610" r="5" class="dot" /> <text x="680" y="600" class="term"
+                text-anchor="middle">21(NC)</text>
+            <circle cx="680" cy="670" r="5" class="dot" /> <text x="680" y="660" class="term"
+                text-anchor="middle">22(NC)</text>
+
+            <circle cx="820" cy="710" r="5" class="dot" /> <text x="820" y="730" class="term" fill="#3B82F6"
+                text-anchor="middle">A2(N)</text>
+            <circle cx="680" cy="710" r="5" class="dot" /> <text x="680" y="730" class="term"
+                text-anchor="middle">T1</text>
+            <circle cx="750" cy="710" r="5" class="dot" /> <text x="750" y="730" class="term"
+                text-anchor="middle">T2(N)</text>
+
+            <!-- Home Load -->
+            <rect x="350" y="780" width="300" height="50" class="component" rx="5" />
+            <text x="500" y="810" class="label" text-anchor="middle">HOUSE MAIN BREAKER PANEL</text>
+            <circle cx="450" cy="780" r="5" class="dot" /> <!-- L Tap -->
+            <circle cx="550" cy="780" r="5" class="dot" /> <!-- N Tap -->
+
+            <!-- ===================== WIRES ===================== -->
+
+            <!-- 1. MAIN POWER CABLES (Thick) -->
+            <!-- Grid Main L & N -->
+            <path d="M 80 140 v 260 h 100 v 150" fill="none" stroke="#EF4444" stroke-width="6" class="wire" />
+            <path d="M 120 140 v 290 h 130 v 120" fill="none" stroke="#3B82F6" stroke-width="6" class="wire" />
+
+            <!-- Gen Main L & N -->
+            <path d="M 880 140 v 290 h -200 v 120" fill="none" stroke="#EAB308" stroke-width="6" class="wire" />
+            <path d="M 920 140 v 320 h -170 v 90" fill="none" stroke="#3B82F6" stroke-width="6" class="wire" />
+
+            <!-- Output to Home from T1/T2 (Thick White/Blue) -->
+            <!-- Bridge K1 T1 to K2 T1, then to Home L -->
+            <path d="M 180 710 v 40 h 270 v 30" fill="none" stroke="#ffffff" stroke-width="5" class="wire" />
+            <path d="M 680 710 v 40 h -230" fill="none" stroke="#ffffff" stroke-width="5" class="wire" />
+
+            <!-- Bridge K1 T2 to K2 T2, then to Home N -->
+            <path d="M 250 710 v 25 h 300 v 45" fill="none" stroke="#3B82F6" stroke-width="5" class="wire" />
+            <path d="M 750 710 v 25 h -200" fill="none" stroke="#3B82F6" stroke-width="5" class="wire" />
+
+            <!-- 2. CONTROL WIRES (Thin) -->
+
+            <!-- GRID CONTROL (Green paths + Red inputs) -->
+            <!-- Grid L Tap to R1 Coil(A1) & R1 COM -->
+            <path d="M 80 200 h 370 v -90" fill="none" stroke="#EF4444" stroke-width="3" class="wire" /> <!-- to A1 -->
+            <path d="M 450 170 v -30" fill="none" stroke="#EF4444" stroke-width="3" class="wire" />
+            <!-- jumper A1 to COM -->
+
+            <!-- Grid N Tap to R1 Coil(A2) -->
+            <path d="M 120 170 h 430 v -60" fill="none" stroke="#3B82F6" stroke-width="2" class="wire" />
+
+            <!-- R1 NO to K2 NC(21) (Green) -->
+            <!-- This is the Interlock path: R1 forces power through K2's NC to ensure K2 is off before firing K1 -->
+            <path d="M 500 170 v 40 h 180 v 400" fill="none" stroke="#10B981" stroke-width="3" class="wire" />
+
+            <!-- K2 NC(22) to K1 Coil(A1) (Green) -->
+            <path d="M 680 670 v 25 h -360 v -145" fill="none" stroke="#10B981" stroke-width="3" class="wire" />
+
+            <!-- GEN CONTROL (Orange paths + Yellow inputs) -->
+            <!-- Gen L Tap to R1 NC -->
+            <path d="M 880 220 h -330 v -50" fill="none" stroke="#EAB308" stroke-width="3" class="wire" />
+
+            <!-- R1 NC to Timer T1 Coil(A1) and COM (Orange) -->
+            <!-- Only gets power if Grid Relay drops out -->
+            <path d="M 550 170 v 50 h 210 v 90" fill="none" stroke="#F97316" stroke-width="3" class="wire" />
+            <path d="M 760 310 v 40" fill="none" stroke="#F97316" stroke-width="3" class="wire" />
+            <!-- Jumper A1 to COM -->
+
+            <!-- Timer NO(Delay Output) to K1 NC(21) (Orange) -->
+            <!-- Starts giving power only after 5 seconds delay -->
+            <path d="M 840 350 v 70 h -660 v 190" fill="none" stroke="#F97316" stroke-width="3" class="wire" />
+
+            <!-- K1 NC(22) to K2 Coil(A1) (Orange) -->
+            <path d="M 180 670 v 35 h 640 v -155" fill="none" stroke="#F97316" stroke-width="3" class="wire" />
+
+            <!-- Control Neutrals (Blue) -->
+            <!-- Timer A2 to Gen N Tap -->
+            <path d="M 840 310 h 80 v -125" fill="none" stroke="#3B82F6" stroke-width="2" class="wire" />
+
+            <!-- K1 A2 to Grid N (Tapping off Main N) -->
+            <path d="M 320 710 v 40 h -70 v -40" fill="none" stroke="#3B82F6" stroke-width="2" class="wire" />
+
+            <!-- K2 A2 to Gen N (Tapping off Main N) -->
+            <path d="M 820 710 v 40 h -70 v -40" fill="none" stroke="#3B82F6" stroke-width="2" class="wire" />
+
+        </svg>
+    </div>
+</body>
+
+</html>

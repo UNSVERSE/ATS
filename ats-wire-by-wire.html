@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step-by-Step ATS Wiring Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #121212;
+            color: #ffffff;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+        }
+
+        .left-panel {
+            flex: 1;
+            padding: 40px;
+            background: #1e1e1e;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .right-panel {
+            flex: 1;
+            position: relative;
+            background: #252525;
+            border-left: 2px solid #333;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            color: #4ade80;
+        }
+
+        .step-container {
+            background: #2d2d2d;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .step-number {
+            font-size: 14px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .step-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .step-desc {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #bbb;
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button.primary {
+            background: #3b82f6;
+            color: #fff;
+        }
+
+        button.primary:hover {
+            background: #2563eb;
+        }
+
+        button.secondary {
+            background: #4b5563;
+            color: #fff;
+        }
+
+        button.secondary:hover {
+            background: #374151;
+        }
+
+        button:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        /* Diagram Styles */
+        .diagram {
+            position: relative;
+            width: 600px;
+            height: 700px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            border: 2px solid #333;
+        }
+
+        .comp {
+            position: absolute;
+            background: #333;
+            border: 2px solid #555;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 10px;
+        }
+
+        .comp-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ccc;
+            text-align: center;
+        }
+
+        .term {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #aaa;
+            border-radius: 50%;
+            border: 2px solid #222;
+        }
+
+        .term-label {
+            position: absolute;
+            font-size: 10px;
+            color: #aaa;
+            font-family: monospace;
+        }
+
+        /* Positions */
+        #r1 {
+            top: 50px;
+            left: 150px;
+            width: 120px;
+            height: 140px;
+        }
+
+        #t1 {
+            top: 50px;
+            right: 150px;
+            width: 120px;
+            height: 140px;
+        }
+
+        #k1 {
+            top: 350px;
+            left: 80px;
+            width: 200px;
+            height: 250px;
+        }
+
+        #k2 {
+            top: 350px;
+            right: 80px;
+            width: 200px;
+            height: 250px;
+        }
+
+        /* Terminals for R1 */
+        #r1-a1 {
+            top: 40px;
+            left: 20px;
+        }
+
+        .l-r1-a1 {
+            top: 30px;
+            left: 15px;
+        }
+
+        #r1-a2 {
+            top: 40px;
+            right: 20px;
+        }
+
+        .l-r1-a2 {
+            top: 30px;
+            right: 10px;
+        }
+
+        #r1-com {
+            bottom: 40px;
+            left: 54px;
+        }
+
+        .l-r1-com {
+            bottom: 25px;
+            left: 45px;
+        }
+
+        #r1-no {
+            bottom: 20px;
+            left: 20px;
+        }
+
+        .l-r1-no {
+            bottom: 5px;
+            left: 15px;
+        }
+
+        #r1-nc {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .l-r1-nc {
+            bottom: 5px;
+            right: 15px;
+        }
+
+        /* Terminals for T1 */
+        #t1-a1 {
+            top: 40px;
+            left: 20px;
+        }
+
+        .l-t1-a1 {
+            top: 30px;
+            left: 15px;
+        }
+
+        #t1-a2 {
+            top: 40px;
+            right: 20px;
+        }
+
+        .l-t1-a2 {
+            top: 30px;
+            right: 10px;
+        }
+
+        #t1-com {
+            bottom: 40px;
+            left: 54px;
+        }
+
+        .l-t1-com {
+            bottom: 25px;
+            left: 45px;
+        }
+
+        #t1-no {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .l-t1-no {
+            bottom: 5px;
+            right: 15px;
+        }
+
+        /* Terminals for K1 */
+        #k1-l1 {
+            top: 40px;
+            left: 40px;
+        }
+
+        .l-k1-l1 {
+            top: 25px;
+            left: 35px;
+        }
+
+        #k1-l2 {
+            top: 40px;
+            left: 94px;
+        }
+
+        .l-k1-l2 {
+            top: 25px;
+            left: 85px;
+        }
+
+        #k1-a1 {
+            top: 40px;
+            right: 30px;
+        }
+
+        .l-k1-a1 {
+            top: 25px;
+            right: 20px;
+        }
+
+        #k1-21 {
+            top: 120px;
+            right: 30px;
+        }
+
+        .l-k1-21 {
+            top: 105px;
+            right: 20px;
+        }
+
+        #k1-22 {
+            top: 160px;
+            right: 30px;
+        }
+
+        .l-k1-22 {
+            top: 145px;
+            right: 20px;
+        }
+
+        #k1-a2 {
+            bottom: 40px;
+            right: 30px;
+        }
+
+        .l-k1-a2 {
+            bottom: 25px;
+            right: 20px;
+        }
+
+        /* Terminals for K2 */
+        #k2-l1 {
+            top: 40px;
+            left: 40px;
+        }
+
+        .l-k2-l1 {
+            top: 25px;
+            left: 35px;
+        }
+
+        #k2-l2 {
+            top: 40px;
+            left: 94px;
+        }
+
+        .l-k2-l2 {
+            top: 25px;
+            left: 85px;
+        }
+
+        #k2-a1 {
+            top: 40px;
+            right: 30px;
+        }
+
+        .l-k2-a1 {
+            top: 25px;
+            right: 20px;
+        }
+
+        #k2-21 {
+            top: 120px;
+            right: 30px;
+        }
+
+        .l-k2-21 {
+            top: 105px;
+            right: 20px;
+        }
+
+        #k2-22 {
+            top: 160px;
+            right: 30px;
+        }
+
+        .l-k2-22 {
+            top: 145px;
+            right: 20px;
+        }
+
+        #k2-a2 {
+            bottom: 40px;
+            right: 30px;
+        }
+
+        .l-k2-a2 {
+            bottom: 25px;
+            right: 20px;
+        }
+
+        .wire-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .wire-path {
+            fill: none;
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .wire-path.active {
+            opacity: 1;
+            animation: drawWire 1.5s forwards ease-in-out;
+            filter: drop-shadow(0 0 5px currentColor);
+        }
+
+        .wire-path.persistent {
+            opacity: 0.8;
+            stroke-dasharray: 0;
+            stroke-dashoffset: 0;
+            filter: none;
+        }
+
+        @keyframes drawWire {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .highlight-term {
+            box-shadow: 0 0 10px 4px yellow;
+            background: yellow;
+            border-color: #fff;
+            transition: 0.3s;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="left-panel">
+        <div class="step-container">
+            <div class="step-number" id="stepNum">Step 1 of 9</div>
+            <div class="step-title" id="stepTitle">Introduction</div>
+            <div class="step-desc" id="stepDesc">
+                Welcome to the wire-by-wire interactive guide.<br><br>
+                Instead of a messy picture with all wires at once, we will connect <strong>one wire at a time</strong>.
+                <br><br>
+                Look at the board on the right. You have 4 main parts:<br>
+                1. <strong>Grid Relay (R1)</strong> - Senses city power.<br>
+                2. <strong>Gen Timer (T1)</strong> - Delays generator start.<br>
+                3. <strong>Grid Contactor (K1)</strong> - The heavy switch for city power.<br>
+                4. <strong>Gen Contactor (K2)</strong> - The heavy switch for generator power.<br><br>
+                Click "Start Wiring" to run the first wire.
+            </div>
+            <div class="controls">
+                <button class="secondary" id="prevBtn" onclick="prevStep()" disabled>Previous</button>
+                <button class="primary" id="nextBtn" onclick="nextStep()">Start Wiring</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="diagram" id="diagram">
+            <!-- Grid Relay -->
+            <div class="comp" id="r1">
+                <div class="comp-title" style="color:#4ade80;">Relay (R1)</div>
+                <div class="term" id="r1-a1"></div>
+                <div class="term-label l-r1-a1">A1</div>
+                <div class="term" id="r1-a2"></div>
+                <div class="term-label l-r1-a2">A2</div>
+                <div class="term" id="r1-com"></div>
+                <div class="term-label l-r1-com">COM</div>
+                <div class="term" id="r1-no"></div>
+                <div class="term-label l-r1-no">NO</div>
+                <div class="term" id="r1-nc"></div>
+                <div class="term-label l-r1-nc">NC</div>
+            </div>
+
+            <!-- Timer -->
+            <div class="comp" id="t1">
+                <div class="comp-title" style="color:#fbbf24;">Timer (T1)</div>
+                <div class="term" id="t1-a1"></div>
+                <div class="term-label l-t1-a1">A1</div>
+                <div class="term" id="t1-a2"></div>
+                <div class="term-label l-t1-a2">A2</div>
+                <div class="term" id="t1-com"></div>
+                <div class="term-label l-t1-com">COM</div>
+                <div class="term" id="t1-no"></div>
+                <div class="term-label l-t1-no">NO</div>
+            </div>
+
+            <!-- K1 -->
+            <div class="comp" id="k1">
+                <div class="comp-title" style="color:#4ade80;">Grid Contactor(K1)</div>
+                <div class="term" id="k1-l1"></div>
+                <div class="term-label l-k1-l1">L1</div>
+                <div class="term" id="k1-l2"></div>
+                <div class="term-label l-k1-l2" style="left:75px">L2(N)</div>
+                <div class="term" id="k1-a1"></div>
+                <div class="term-label l-k1-a1">A1</div>
+                <div class="term" id="k1-21"></div>
+                <div class="term-label l-k1-21">21(NC)</div>
+                <div class="term" id="k1-22"></div>
+                <div class="term-label l-k1-22">22(NC)</div>
+                <div class="term" id="k1-a2"></div>
+                <div class="term-label l-k1-a2">A2</div>
+            </div>
+
+            <!-- K2 -->
+            <div class="comp" id="k2">
+                <div class="comp-title" style="color:#fbbf24;">Gen Contactor(K2)</div>
+                <div class="term" id="k2-l1"></div>
+                <div class="term-label l-k2-l1">L1</div>
+                <div class="term" id="k2-l2"></div>
+                <div class="term-label l-k2-l2" style="left:75px">L2(N)</div>
+                <div class="term" id="k2-a1"></div>
+                <div class="term-label l-k2-a1">A1</div>
+                <div class="term" id="k2-21"></div>
+                <div class="term-label l-k2-21">21(NC)</div>
+                <div class="term" id="k2-22"></div>
+                <div class="term-label l-k2-22">22(NC)</div>
+                <div class="term" id="k2-a2"></div>
+                <div class="term-label l-k2-a2">A2</div>
+            </div>
+
+            <!-- Wires SVG -->
+            <svg class="wire-svg" id="wires">
+                <!-- Grid Power to Relay -->
+                <path id="w1" class="wire-path" stroke="#ef4444" d="M 0 90 L 176 90" /> <!-- To R1-A1 -->
+                <path id="w1-jump" class="wire-path" stroke="#ef4444" d="M 176 90 v 150 h 34 v -50" />
+                <!-- Jump A1 to COM -->
+
+                <!-- Grid Safety Path 1: R1 NO to K2 21(NC) -->
+                <path id="w2" class="wire-path" stroke="#10b981" d="M 176 170 v 30 h 334 v 270" />
+
+                <!-- Grid Safety Path 2: K2 22(NC) to K1 A1 -->
+                <path id="w3" class="wire-path" stroke="#10b981" d="M 510 510 v 40 h -260 v -160" />
+
+                <!-- Gen Power to Relay NC -->
+                <path id="w4" class="wire-path" stroke="#eab308" d="M 600 170 L 250 170" /> <!-- To R1-NC -->
+
+                <!-- Gen Safety Path 1: R1 NC to Timer T1 A1 and COM -->
+                <path id="w5" class="wire-path" stroke="#f97316" d="M 250 170 v 30 h 100 v -110" />
+                <path id="w5-jump" class="wire-path" stroke="#f97316" d="M 350 90 v 100 h 34 v -40" />
+
+                <!-- Gen Safety Path 2: Timer NO to K1 21(NC) -->
+                <path id="w6" class="wire-path" stroke="#f97316" d="M 430 170 v 40 h -170 v 260" />
+
+                <!-- Gen Safety Path 3: K1 22(NC) to K2 A1 -->
+                <path id="w7" class="wire-path" stroke="#f97316" d="M 250 510 v 60 h 260 v -180" />
+
+                <!-- Neutrals -->
+                <path id="w8" class="wire-path" stroke="#3b82f6" d="M 250 590 h -180 v -500 h 126" />
+                <path id="w8-1" class="wire-path" stroke="#3b82f6" d="M 70 590 v -200 h 440 v -300 h -80" />
+                <path id="w8-2" class="wire-path" stroke="#3b82f6" d="M 530 590 h 70" />
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        const steps = [
+            {
+                title: "Introduction",
+                desc: "Welcome to the wire-by-wire interactive guide.<br><br>Look at the board on the right. You have 4 main parts:<br>1. <strong>Grid Relay (R1)</strong> - Senses city power.<br>2. <strong>Gen Timer (T1)</strong> - Delays generator start.<br>3. <strong>Grid Contactor (K1)</strong> - The heavy switch for city power.<br>4. <strong>Gen Contactor (K2)</strong> - The heavy switch for generator power.<br><br>Click 'Start Wiring' to run the first wire.",
+                wires: [],
+                dots: []
+            },
+            {
+                title: "Grid Step 1: Powering the Brain",
+                desc: "<strong>Wire 1: The Red Wire</strong><br><br>Take a RED wire from your <strong>Grid Phase</strong> line.<br>Connect it to <strong>Terminal A1</strong> on the Relay (R1).<br><br><em>Also, connect a tiny jumper wire from A1 down to the COM (Common) terminal on R1.</em><br><br><strong>Why?</strong> This tells the Relay to turn ON when the city has power, and provides power to the contactors later.",
+                wires: ['w1', 'w1-jump'],
+                dots: ['r1-a1', 'r1-com']
+            },
+            {
+                title: "Grid Step 2: The Interlock Pathway",
+                desc: "<strong>Wire 2: The First Green Wire</strong><br><br>Take a GREEN wire.<br>Connect one end to <strong>Terminal NO (Normally Open)</strong> on the Relay (R1).<br>Connect the other end to <strong>Terminal 21 (NC)</strong> on the Gen Contactor (K2).<br><br><strong>Why?</strong> This ensures Grid power ONLY flows towards K1 if the Generator contactor (K2) is resting. This is your safety lock.",
+                wires: ['w2'],
+                dots: ['r1-no', 'k2-21']
+            },
+            {
+                title: "Grid Step 3: Closing the Grid Switch",
+                desc: "<strong>Wire 3: The Second Green Wire</strong><br><br>Take another GREEN wire.<br>Connect one end to <strong>Terminal 22 (NC)</strong> on the Gen Contactor (K2).<br>Connect the other end to <strong>Terminal A1 (Coil)</strong> on the Grid Contactor (K1).<br><br><strong>Why?</strong> The electricity safely passed *through* K2, and now it tells K1 to turn ON. Your Grid path is done!",
+                wires: ['w3'],
+                dots: ['k2-22', 'k1-a1']
+            },
+            {
+                title: "Gen Step 1: The Generator Sensor",
+                desc: "<strong>Wire 4: The Yellow Wire</strong><br><br>Take a YELLOW wire from your <strong>Generator Phase</strong> line.<br>Connect it to <strong>Terminal NC (Normally Closed)</strong> on the Relay (R1).<br><br><strong>Why?</strong> When the Relay dies (Grid power cuts out), this pin closes and suddenly receives generator power.",
+                wires: ['w4'],
+                dots: ['r1-nc']
+            },
+            {
+                title: "Gen Step 2: Starting the Timer",
+                desc: "<strong>Wire 5: The First Orange Wire</strong><br><br>Take an ORANGE wire.<br>Connect it from <strong>Terminal NC</strong> on R1 to <strong>Terminal A1</strong> on the Timer (T1).<br><em>Add a small jumper from T1 A1 to T1 COM.</em><br><br><strong>Why?</strong> This provides power to start the 5-second countdown on the timer.",
+                wires: ['w5', 'w5-jump'],
+                dots: ['r1-nc', 't1-a1', 't1-com']
+            },
+            {
+                title: "Gen Step 3: Crossing the Interlock",
+                desc: "<strong>Wire 6: The Second Orange Wire</strong><br><br>Take an ORANGE wire.<br>Connect one end to <strong>Terminal NO (Delay)</strong> on the Timer (T1).<br>Connect the other end to <strong>Terminal 21 (NC)</strong> on the Grid Contactor (K1).<br><br><strong>Why?</strong> After 5 seconds, power comes out of the timer, and we must route it <em>through</em> the resting K1 to ensure it's safe to proceed.",
+                wires: ['w6'],
+                dots: ['t1-no', 'k1-21']
+            },
+            {
+                title: "Gen Step 4: Activating Generator",
+                desc: "<strong>Wire 7: The Final Orange Wire</strong><br><br>Take your last ORANGE wire.<br>Connect one end to <strong>Terminal 22 (NC)</strong> on the Grid Contactor (K1).<br>Connect the other end to <strong>Terminal A1 (Coil)</strong> on the Gen Contactor (K2).<br><br><strong>Why?</strong> The generator control power has safely navigated the interlock and now forces the generator switch closed!",
+                wires: ['w7'],
+                dots: ['k1-22', 'k2-a1']
+            },
+            {
+                title: "Final Step: Connecting Neutrals",
+                desc: "<strong>Wire 8: The Blue Wires</strong><br><br>Every coil needs a Neutral to complete the circuit.<br><br>Connect BLUE wires to tie these together:<br>- Grid Main Neutral<br>- R1 <strong>Terminal A2</strong><br>- K1 <strong>Terminal A2</strong><br>- T1 <strong>Terminal A2</strong><br>- K2 <strong>Terminal A2</strong><br><br><strong>Congratulations! Your control wiring is complete.</strong>",
+                wires: ['w8', 'w8-1', 'w8-2'],
+                dots: ['r1-a2', 't1-a2', 'k1-a2', 'k2-a2']
+            }
+        ];
+
+        let currentStep = 0;
+
+        function updateUI() {
+            // Update Text
+            document.getElementById('stepNum').innerText = `Step ${currentStep + 1} of ${steps.length}`;
+            document.getElementById('stepTitle').innerHTML = steps[currentStep].title;
+            document.getElementById('stepDesc').innerHTML = steps[currentStep].desc;
+
+            // Buttons
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').innerText = currentStep === steps.length - 1 ? "Finish" : (currentStep === 0 ? "Start Wiring" : "Next Wire");
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+
+            // Stop all animations instantly
+            const paths = document.querySelectorAll('.wire-path');
+            paths.forEach(p => {
+                p.style.animation = 'none'; // Clear any running animation
+                p.offsetHeight; /* trigger reflow */
+                p.classList.remove('active', 'persistent');
+            });
+
+            document.querySelectorAll('.term').forEach(el => {
+                el.classList.remove('highlight-term');
+            });
+
+            // Make past wires persistent
+            for (let i = 0; i < currentStep; i++) {
+                steps[i].wires.forEach(w => {
+                    const el = document.getElementById(w);
+                    if (el) {
+                        el.classList.add('persistent');
+                    }
+                });
+            }
+
+            // Animate current wires
+            if (currentStep > 0) {
+                steps[currentStep].wires.forEach(w => {
+                    const el = document.getElementById(w);
+                    if (el) {
+                        el.style.animation = ''; // restore animation property from css
+                        el.classList.add('active');
+                    }
+                });
+            }
+
+            // Highlight dots
+            if (currentStep > 0) {
+                steps[currentStep].dots.forEach(d => {
+                    const el = document.getElementById(d);
+                    if (el) el.classList.add('highlight-term');
+                });
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateUI();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateUI();
+            }
+        }
+
+        // Init
+        updateUI();
+    </script>
+</body>
+
+</html>
